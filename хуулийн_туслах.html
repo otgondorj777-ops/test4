@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Хуулийн Туслах</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+.header{background:#1a1a2e;color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:17px;font-weight:700}
+.header p{font-size:11px;opacity:.6;margin-top:1px}
+.key-row{display:flex;align-items:center;gap:7px}
+.key-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;transition:background .3s}
+.key-dot.ok{background:#22c55e}
+#apiKey{padding:6px 10px;border:1.5px solid #ffffff33;border-radius:6px;background:#ffffff15;color:#fff;font-size:12px;font-family:monospace;width:270px}
+#apiKey::placeholder{color:#ffffff55}
+#apiKey:focus{outline:none;border-color:#60a5fa}
+
+.nav{background:#fff;border-bottom:2px solid #e5e7eb;display:flex}
+.nb{padding:13px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
+.nb:hover{color:#1a1a2e}
+.nb.active{color:#1a1a2e;border-bottom-color:#1a1a2e}
+
+.wrap{max-width:940px;margin:22px auto;padding:0 16px 60px}
+
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 1px 5px rgba(0,0,0,.07)}
+.ct{font-size:12px;font-weight:700;color:#374151;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+
+.stabs{display:flex;gap:3px;background:#f1f5f9;padding:3px;border-radius:9px;margin-bottom:16px}
+.stab{flex:1;padding:8px;border:none;background:transparent;border-radius:7px;font-size:12px;font-weight:600;color:#6b7280;cursor:pointer;transition:all .18s;text-align:center}
+.stab.active{background:#fff;color:#1a1a2e;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+.dz{border:2px dashed #d1d5db;border-radius:9px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
+.dz:hover,.dz.drag{border-color:#2563eb;background:#eff6ff}
+.dz-icon{font-size:28px;margin-bottom:5px}
+.dz p{color:#6b7280;font-size:13px}
+.dz strong{color:#2563eb}
+.fb{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px 12px;font-size:12px;color:#166534;display:flex;align-items:center;gap:6px;margin-top:8px}
+
+.or{text-align:center;color:#9ca3af;font-size:12px;margin:12px 0;position:relative}
+.or::before,.or::after{content:'';position:absolute;top:50%;width:45%;height:1px;background:#e5e7eb}
+.or::before{left:0}.or::after{right:0}
+
+textarea{width:100%;padding:11px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;line-height:1.65;resize:vertical;font-family:inherit;min-height:120px}
+textarea:focus{outline:none;border-color:#2563eb}
+textarea.tall{min-height:200px}
+textarea.short{min-height:75px}
+
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:13px}
+@media(max-width:600px){.frow,.frow3{grid-template-columns:1fr}}
+label.lbl{display:block;font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+select,input.inp{width:100%;padding:8px 10px;border:1.5px solid #d1d5db;border-radius:7px;font-size:13px;background:#fff;color:#1a1a2e}
+select:focus,input.inp:focus{outline:none;border-color:#2563eb}
+
+.btn{background:#1a1a2e;color:#fff;border:none;padding:13px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:background .2s;margin-top:2px}
+.btn:hover{background:#2d2d4e}
+.btn:disabled{background:#9ca3af;cursor:not-allowed}
+.btn-o{background:#fff;color:#1a1a2e;border:1.5px solid #1a1a2e;padding:8px 15px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;margin-right:7px;margin-top:12px}
+.btn-o:hover{background:#f1f5f9}
+
+.spin-box{text-align:center;padding:36px}
+.spinner{width:34px;height:34px;border:4px solid #e5e7eb;border-top-color:#1a1a2e;border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.spin-box p{color:#6b7280;font-size:13px}
+.spin-box small{color:#9ca3af;font-size:11px}
+
+/* ── Rendered markdown output ── */
+.md-out{font-size:13.5px;line-height:1.85;color:#1e293b;padding:4px 0}
+.md-out h1{font-size:17px;font-weight:800;color:#1a1a2e;margin:18px 0 8px;padding-bottom:6px;border-bottom:2px solid #e5e7eb}
+.md-out h2{font-size:15px;font-weight:700;color:#1a1a2e;margin:16px 0 7px;padding-bottom:4px;border-bottom:1.5px solid #e5e7eb}
+.md-out h3{font-size:13.5px;font-weight:700;color:#374151;margin:14px 0 6px}
+.md-out h4{font-size:13px;font-weight:700;color:#374151;margin:10px 0 4px}
+.md-out p{margin:5px 0 8px}
+.md-out ul,.md-out ol{padding-left:20px;margin:5px 0 10px}
+.md-out li{margin:3px 0;line-height:1.7}
+.md-out strong{font-weight:700;color:#1a1a2e}
+.md-out em{color:#374151}
+.md-out table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px}
+.md-out th{background:#1a1a2e;color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:12px}
+.md-out td{padding:7px 10px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+.md-out tr:nth-child(even) td{background:#f8fafc}
+.md-out hr{border:none;border-top:1.5px solid #e5e7eb;margin:14px 0}
+.md-out blockquote{border-left:3px solid #3b82f6;padding:8px 14px;background:#eff6ff;border-radius:0 6px 6px 0;margin:8px 0;color:#1e40af;font-size:13px}
+.md-out code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px}
+.md-out pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;overflow-x:auto;font-size:12px;line-height:1.6;margin:8px 0}
+
+.result-card{background:#fff;border-radius:12px;padding:22px;margin-bottom:15px;box-shadow:0 1px 5px rgba(0,0,0,.07)}
+.score-row{display:flex;align-items:center;gap:16px;background:#f8fafc;border-radius:9px;padding:15px;margin-bottom:16px}
+.score-circle{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0}
+.sc-g{background:linear-gradient(135deg,#16a34a,#22c55e)}
+.sc-y{background:linear-gradient(135deg,#d97706,#f59e0b)}
+.sc-r{background:linear-gradient(135deg,#dc2626,#ef4444)}
+
+.linfo{font-size:11px;color:#6b7280;margin-top:12px;padding:7px 10px;background:#eff6ff;border-radius:6px;border-left:3px solid #3b82f6}
+
+.extract-box{background:#1e293b;color:#e2e8f0;border-radius:8px;padding:14px;font-size:12px;line-height:1.7;max-height:320px;overflow-y:auto;font-family:monospace;white-space:pre-wrap;margin-top:10px}
+
+.hidden{display:none}
+.sec{display:none}.sec.active{display:block}
+.pane{display:none}.pane.active{display:block}
+
+.prog-wrap{margin-top:10px}
+.prog-bar{width:100%;background:#e5e7eb;border-radius:4px;height:5px}
+.prog-fill{background:#2563eb;border-radius:4px;height:5px;transition:width .3s}
+.prog-lbl{font-size:11px;color:#6b7280;margin-top:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>⚖️ Хуулийн Туслах</h1>
+    <p>Гэрээ · Файл хөрвүүлэх · Шүүхийн бэлтгэл</p>
+  </div>
+  <div class="key-row">
+    <div class="key-dot" id="kd"></div>
+    <input type="password" id="apiKey" placeholder="sk-ant-... API key" oninput="onKey()"/>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb active" onclick="goSec('contracts',this)">📋 Гэрээ</button>
+  <button class="nb" onclick="goSec('convert',this)">🔄 Файл хөрвүүлэх</button>
+  <button class="nb" onclick="goSec('court',this)">🏛️ Шүүхийн бэлтгэл</button>
+</div>
+
+<div class="wrap">
+
+<!-- ═══════════ SECTION 1: CONTRACTS ═══════════ -->
+<div class="sec active" id="sec-contracts">
+  <div class="stabs">
+    <button class="stab active" onclick="goPane('c','review',this)">🔍 Гэрээ хянах</button>
+    <button class="stab" onclick="goPane('c','suggest',this)">✏️ Санал боловсруулах</button>
+    <button class="stab" onclick="goPane('c','draft',this)">📝 Гэрээний төсөл</button>
+  </div>
+
+  <!-- REVIEW -->
+  <div class="pane active" id="c-review">
+    <div class="card">
+      <div class="ct">📄 Гэрээний баримт бичиг</div>
+      <div class="dz" id="rv-z"><div class="dz-icon">📂</div>
+        <p><strong>Дарж сонгох</strong> эсвэл чирэх &nbsp;(.docx · .pdf · .txt)</p>
+        <input type="file" id="rv-f" accept=".docx,.doc,.txt,.pdf" style="display:none"/></div>
+      <div class="fb hidden" id="rv-b">📄 <span id="rv-fn"></span></div>
+      <div class="or">эсвэл текст paste хийх</div>
+      <textarea id="rv-t" placeholder="Гэрээний бүрэн текстийг энд оруулна уу..."></textarea>
+    </div>
+    <div class="card">
+      <div class="ct">⚙️ Тохиргоо</div>
+      <div class="frow3">
+        <div><label class="lbl">Гэрээний төрөл</label>
+          <select id="rv-ct"><option value="auto">Автомат илрүүлэх</option>
+            <option>Худалдах-худалдан авах гэрээ</option><option>Хөдөлмөрийн гэрээ</option>
+            <option>Түрээсийн гэрээ</option><option>Үйлчилгээний гэрээ</option>
+            <option>Зээлийн гэрээ</option><option>Хамтын ажиллагааны гэрээ</option>
+            <option>Олон улсын худалдааны гэрээ</option></select></div>
+        <div><label class="lbl">Хуулийн хүрээ</label>
+          <select id="rv-j"><option value="mn">Монголын хууль</option>
+            <option value="intl">Олон улсын стандарт</option>
+            <option value="both">Хоёуланг нь</option></select></div>
+        <div><label class="lbl">AI загвар</label>
+          <select id="rv-m">
+            <option value="claude-opus-4-8">Opus — хамгийн сайн</option>
+            <option value="claude-sonnet-4-6" selected>Sonnet — нарийн</option>
+            <option value="claude-haiku-4-5-20251001">Haiku — хурдан</option></select></div>
+      </div>
+    </div>
+    <button class="btn" id="rv-btn" onclick="doReview()">🔍 Гэрээ хянах</button>
+    <div class="card hidden" id="rv-load"><div class="spin-box"><div class="spinner"></div><p>Гэрээг нарийвчлан хянаж байна...</p><small>legalinfo.mn хуулиудад нийцүүлж байна</small></div></div>
+    <div class="result-card hidden" id="rv-res">
+      <div class="ct">📊 Хяналтын тайлан</div>
+      <div class="md-out" id="rv-out"></div>
+      <div class="linfo">💡 Хуулийн иш татлагыг <strong>legalinfo.mn</strong>-ээс нягтлаарай.</div>
+      <button class="btn-o" onclick="dlDoc('rv-out','гэрээ_хяналт')">⬇️ Word татах</button>
+      <button class="btn-o" onclick="dlTxt('rv-out','гэрээ_хяналт')">⬇️ .txt татах</button>
+    </div>
+  </div>
+
+  <!-- SUGGEST -->
+  <div class="pane hidden" id="c-suggest">
+    <div class="card">
+      <div class="ct">📄 Засвар оруулах гэрээ</div>
+      <div class="dz" id="sg-z"><div class="dz-icon">📂</div>
+        <p><strong>Дарж сонгох</strong> эсвэл чирэх</p>
+        <input type="file" id="sg-f" accept=".docx,.doc,.txt,.pdf" style="display:none"/></div>
+      <div class="fb hidden" id="sg-b">📄 <span id="sg-fn"></span></div>
+      <div class="or">эсвэл текст paste хийх</div>
+      <textarea id="sg-t" placeholder="Засвар оруулах гэрээний текст..."></textarea>
+    </div>
+    <div class="card">
+      <div class="ct">💡 Засварын чиглэл</div>
+      <textarea class="short" id="sg-dir" placeholder="Засварын чиглэл, онцлог хүсэлтийг бичнэ үү. Жишээ: нэхэмжлэгчийн талд хамгаалах, хариуцлагын заалтыг хүчтэй болгох, торгуулийн хэмжээ нэмэх..."></textarea>
+      <div class="frow" style="margin-top:12px">
+        <div><label class="lbl">Чиглэл</label>
+          <select id="sg-s"><option value="balanced">Тэнцвэртэй</option>
+            <option value="party1">Нэхэмжлэгчийн / Нэг талын талд</option>
+            <option value="party2">Хариуцагчийн / Нөгөө талын талд</option></select></div>
+        <div><label class="lbl">AI загвар</label>
+          <select id="sg-m">
+            <option value="claude-opus-4-8">Opus — хамгийн сайн</option>
+            <option value="claude-sonnet-4-6" selected>Sonnet</option>
+            <option value="claude-haiku-4-5-20251001">Haiku</option></select></div>
+      </div>
+    </div>
+    <button class="btn" id="sg-btn" onclick="doSuggest()">✏️ Засварын санал боловсруулах</button>
+    <div class="card hidden" id="sg-load"><div class="spin-box"><div class="spinner"></div><p>Засварын санал боловсруулж байна...</p></div></div>
+    <div class="result-card hidden" id="sg-res">
+      <div class="ct">✏️ Засварын санал</div>
+      <div class="md-out" id="sg-out"></div>
+      <div class="linfo">💡 Хуулийн иш татлагыг <strong>legalinfo.mn</strong>-ээс нягтлаарай.</div>
+      <button class="btn-o" onclick="dlDoc('sg-out','гэрээ_засвар')">⬇️ Word татах</button>
+      <button class="btn-o" onclick="dlTxt('sg-out','гэрээ_засвар')">⬇️ .txt татах</button>
+    </div>
+  </div>
+
+  <!-- DRAFT -->
+  <div class="pane hidden" id="c-draft">
+    <div class="card">
+      <div class="ct">📝 Гэрээний мэдээлэл оруулах</div>
+      <div class="frow">
+        <div><label class="lbl">Гэрээний төрөл</label>
+          <select id="dr-t"><option>Худалдах-худалдан авах гэрээ</option>
+            <option>Хөдөлмөрийн гэрээ</option><option>Түрээсийн гэрээ</option>
+            <option>Үйлчилгээний гэрээ</option><option>Зээлийн гэрээ</option>
+            <option>Хамтын ажиллагааны гэрээ</option><option>Нийлүүлэлтийн гэрээ</option>
+            <option>Оюуны өмч шилжүүлэх гэрээ</option></select></div>
+        <div><label class="lbl">Гэрээний хэл</label>
+          <select id="dr-l"><option value="mn">Монгол хэл</option>
+            <option value="en">English</option>
+            <option value="both">Монгол + Англи (хавсарсан)</option></select></div>
+      </div>
+      <div class="frow">
+        <div><label class="lbl">Нэг тал (нэр/байгууллага)</label>
+          <input class="inp" id="dr-p1" placeholder="ХХК-ийн нэр эсвэл иргэний нэр..."/></div>
+        <div><label class="lbl">Нөгөө тал</label>
+          <input class="inp" id="dr-p2" placeholder="ХХК-ийн нэр эсвэл иргэний нэр..."/></div>
+      </div>
+      <label class="lbl">Гэрээний гол нөхцөл, онцлог шаардлага</label>
+      <textarea id="dr-d" placeholder="Үнэ, хугацаа, байршил, онцлог шаардлага, торгуулийн нөхцөл, маргаан шийдвэрлэх журам г.м. бүрэн бичнэ үү..."></textarea>
+      <div style="margin-top:12px"><label class="lbl">AI загвар</label>
+        <select id="dr-m" style="width:210px">
+          <option value="claude-opus-4-8">Opus (хамгийн сайн)</option>
+          <option value="claude-sonnet-4-6" selected>Sonnet (нарийн)</option>
+          <option value="claude-haiku-4-5-20251001">Haiku (хурдан)</option></select></div>
+    </div>
+    <button class="btn" id="dr-btn" onclick="doDraft()">📝 Гэрээний төсөл бэлдэх</button>
+    <div class="card hidden" id="dr-load"><div class="spin-box"><div class="spinner"></div><p>Гэрээний төсөл боловсруулж байна...</p><small>Монголын хуулийн стандартад нийцүүлж байна</small></div></div>
+    <div class="result-card hidden" id="dr-res">
+      <div class="ct">📝 Гэрээний төсөл</div>
+      <div class="md-out" id="dr-out"></div>
+      <div class="linfo">⚠️ Эцсийн гэрээг хуульч мэргэжилтнээр нягтлуулахыг зөвлөж байна.</div>
+      <button class="btn-o" onclick="dlDoc('dr-out','гэрээний_төсөл')">⬇️ Word татах</button>
+      <button class="btn-o" onclick="dlTxt('dr-out','гэрээний_төсөл')">⬇️ .txt татах</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 2: CONVERT ═══════════ -->
+<div class="sec hidden" id="sec-convert">
+  <div class="card">
+    <div class="ct">🔄 Файл → Текст / Word хөрвүүлэгч</div>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:14px">PDF, PNG, JPG, JPEG зэрэг файлаас текст гарган авч Word формаар татна. Зурган файлд Tesseract OCR эсвэл Claude Vision ашиглана.</p>
+    <div class="dz" id="cv-z"><div class="dz-icon">📁</div>
+      <p><strong>Дарж сонгох</strong> эсвэл чирэх</p>
+      <p style="margin-top:4px;font-size:12px;color:#9ca3af">.pdf · .png · .jpg · .jpeg · .docx · .txt</p>
+      <input type="file" id="cv-f" accept=".pdf,.png,.jpg,.jpeg,.docx,.doc,.txt" style="display:none"/></div>
+    <div class="fb hidden" id="cv-b">📄 <span id="cv-fn"></span></div>
+    <div class="prog-wrap hidden" id="cv-pg"><div class="prog-bar"><div class="prog-fill" id="cv-pf" style="width:0%"></div></div>
+      <div class="prog-lbl" id="cv-pl"></div></div>
+  </div>
+  <div class="card hidden" id="cv-opts">
+    <div class="ct">⚙️ Тохиргоо</div>
+    <div class="frow">
+      <div><label class="lbl">OCR хэл</label>
+        <select id="cv-ol"><option value="claude">Claude AI Vision (хамгийн нарийн)</option>
+          <option value="mn+eng">Tesseract: Монгол + Англи</option>
+          <option value="eng">Tesseract: English only</option></select></div>
+      <div><label class="lbl">Гаралтын формат</label>
+        <select id="cv-of"><option value="word">Word (.doc)</option>
+          <option value="txt">Текст (.txt)</option></select></div>
+    </div>
+    <button class="btn" id="cv-btn" onclick="doConvert()">🔄 Хөрвүүлэх</button>
+  </div>
+  <div class="card hidden" id="cv-load"><div class="spin-box"><div class="spinner"></div>
+    <p id="cv-st">Файл боловсруулж байна...</p><small>OCR / Claude Vision ашиглаж байна</small></div></div>
+  <div class="result-card hidden" id="cv-res">
+    <div class="ct">✅ Гарган авсан текст</div>
+    <div class="extract-box" id="cv-out"></div>
+    <button class="btn-o" onclick="dlDocRaw('cv-out','хөрвүүлсэн')">⬇️ Word татах</button>
+    <button class="btn-o" onclick="dlTxtRaw('cv-out','хөрвүүлсэн')">⬇️ .txt татах</button>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 3: COURT ═══════════ -->
+<div class="sec hidden" id="sec-court">
+  <div class="stabs">
+    <button class="stab active" onclick="goPane('k','brief',this)">📋 Хэргийн товьёог</button>
+    <button class="stab" onclick="goPane('k','hearing',this)">🏛️ Шүүх хуралдааны бэлтгэл</button>
+    <button class="stab" onclick="goPane('k','similar',this)">🔎 Ижил шийдвэр</button>
+  </div>
+
+  <!-- BRIEF -->
+  <div class="pane active" id="k-brief">
+    <div class="card">
+      <div class="ct">🏛️ Хэргийн үндсэн мэдээлэл</div>
+      <div class="frow">
+        <div><label class="lbl">Шүүх</label>
+          <input class="inp" id="kb-court" placeholder="Жишээ: БЗД-ийн Иргэний хэргийн тойргийн шүүх"/></div>
+        <div><label class="lbl">Хэргийн дугаар</label>
+          <input class="inp" id="kb-no" placeholder="182/ШШ2024/01234"/></div>
+      </div>
+      <div class="frow">
+        <div><label class="lbl">Нэхэмжлэгч</label>
+          <input class="inp" id="kb-pl" placeholder="Иргэн/байгууллагын нэр, өмгөөлөгч..."/></div>
+        <div><label class="lbl">Хариуцагч</label>
+          <input class="inp" id="kb-df" placeholder="Иргэн/байгууллагын нэр..."/></div>
+      </div>
+      <label class="lbl">Нэхэмжлэлийн шаардлага</label>
+      <textarea class="short" id="kb-cl" placeholder="Юу нэхэмжилж байгааг товч бичнэ үү..."></textarea>
+    </div>
+    <div class="card">
+      <div class="ct">📄 Хэргийн материал</div>
+      <div class="dz" id="kb-z"><div class="dz-icon">📂</div>
+        <p><strong>Хэргийн баримт бичгийн файл</strong> (.docx · .pdf · .txt)</p>
+        <input type="file" id="kb-f" accept=".docx,.doc,.txt,.pdf" style="display:none"/></div>
+      <div class="fb hidden" id="kb-b">📄 <span id="kb-fn"></span></div>
+      <div class="or">эсвэл текст paste хийх</div>
+      <textarea class="tall" id="kb-docs" placeholder="Хэргийн баримт бичиг, он цагийн дараалал, нотлох баримт, шүүхийн шийдвэр зэргийг оруулна уу..."></textarea>
+      <div style="margin-top:11px"><label class="lbl">AI загвар</label>
+        <select id="kb-m" style="width:210px">
+          <option value="claude-opus-4-8">Opus (хамгийн сайн)</option>
+          <option value="claude-sonnet-4-6" selected>Sonnet (нарийн)</option>
+          <option value="claude-haiku-4-5-20251001">Haiku (хурдан)</option></select></div>
+    </div>
+    <button class="btn" id="kb-btn" onclick="doBrief()">📋 Хэргийн дэлгэрэнгүй товьёог бэлдэх</button>
+    <div class="card hidden" id="kb-load"><div class="spin-box"><div class="spinner"></div><p>Хэргийн товьёог боловсруулж байна...</p><small>legalinfo.mn хуулиудад нийцүүлж байна</small></div></div>
+    <div class="result-card hidden" id="kb-res">
+      <div class="ct">📋 Хэргийн дэлгэрэнгүй товьёог</div>
+      <div class="md-out" id="kb-out"></div>
+      <div class="linfo">💡 Хуулийн заалтыг <strong>legalinfo.mn</strong>-ээс, шийдвэрийн дугаарыг <strong>shuukh.mn</strong>-ээс нягтлаарай.</div>
+      <button class="btn-o" onclick="dlDoc('kb-out','хэргийн_товьёог')">⬇️ Word татах</button>
+      <button class="btn-o" onclick="dlTxt('kb-out','хэргийн_товьёог')">⬇️ .txt татах</button>
+    </div>
+  </div>
+
+  <!-- HEARING -->
+  <div class="pane hidden" id="k-hearing">
+    <div class="card">
+      <div class="ct">🏛️ Шүүх хуралдааны мэдээлэл</div>
+      <div class="frow">
+        <div><label class="lbl">Хуралдааны огноо</label>
+          <input class="inp" type="date" id="kh-dt"/></div>
+        <div><label class="lbl">Шүүгч</label>
+          <input class="inp" id="kh-jd" placeholder="Шүүгчийн нэр..."/></div>
+      </div>
+      <label class="lbl">Таны байр суурь / хамгаалах чиглэл</label>
+      <textarea class="short" id="kh-pos" placeholder="Жишээ: Нэхэмжлэлийг бүрэн хангуулах. Гол баримт: 2016.01.15-ны №1/443 бичиг, 2019 оны хөрөнгө хүлээлцэх акт. Хариуцагчаас 3,054 м² дотор 168.64 м² багтаж байсан эсэхийг нотлуулах..."></textarea>
+    </div>
+    <div class="card">
+      <div class="ct">📄 Хэргийн материал</div>
+      <div class="dz" id="kh-z"><div class="dz-icon">📂</div>
+        <p><strong>Хэргийн бүх материал</strong> — товьёог, нотлох баримт, шийдвэр (.docx · .pdf · .txt)</p>
+        <input type="file" id="kh-f" accept=".docx,.doc,.txt,.pdf" style="display:none"/></div>
+      <div class="fb hidden" id="kh-b">📄 <span id="kh-fn"></span></div>
+      <div class="or">эсвэл текст paste хийх</div>
+      <textarea class="tall" id="kh-docs" placeholder="Хэргийн товьёог, нотлох баримтын жагсаалт, давж заалдах магадлал, шүүхийн шийдвэрүүд зэрэг бүх материалыг энд оруулна уу...&#10;&#10;💡 Файл оруулсны дараа текст автоматаар дүүрнэ."></textarea>
+      <div style="margin-top:11px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div><label class="lbl">AI загвар</label>
+          <select id="kh-m" style="width:210px">
+            <option value="claude-opus-4-8">Opus (хамгийн сайн)</option>
+            <option value="claude-sonnet-4-6" selected>Sonnet (нарийн)</option>
+            <option value="claude-haiku-4-5-20251001">Haiku (хурдан)</option></select></div>
+        <div style="margin-top:14px">
+          <button class="btn-o" onclick="autoFillHearing()" id="kh-auto">🔍 Мэдээлэл автоматаар бөглөх</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn" id="kh-btn" onclick="doHearing()">🏛️ Өмгөөллийн дотоод бэлтгэл хийх</button>
+    <div class="card hidden" id="kh-load"><div class="spin-box"><div class="spinner"></div><p>Шүүх хуралдааны бэлтгэлийн материал боловсруулж байна...</p><small>Хуулийн заалт, стратеги, асуулт тодруулж байна</small></div></div>
+    <div class="result-card hidden" id="kh-res">
+      <div class="ct">🏛️ ӨМГӨӨЛЛИЙН ДОТООД БЭЛТГЭЛ</div>
+      <div class="md-out" id="kh-out"></div>
+      <div class="linfo">💡 Хуулийн заалтыг <strong>legalinfo.mn</strong>-ээс нягтлаарай.</div>
+      <button class="btn-o" onclick="dlDoc('kh-out','шүүх_бэлтгэл')">⬇️ Word татах</button>
+      <button class="btn-o" onclick="dlTxt('kh-out','шүүх_бэлтгэл')">⬇️ .txt татах</button>
+    </div>
+  </div>
+
+  <!-- SIMILAR -->
+  <div class="pane hidden" id="k-similar">
+    <div class="card">
+      <div class="ct">🔎 Ижил төстэй шүүхийн шийдвэр хайх</div>
+      <div class="frow">
+        <div><label class="lbl">Хэргийн ангилал</label>
+          <select id="sm-t"><option>Иргэний хэрэг — үл хөдлөх хөрөнгө</option>
+            <option>Иргэний хэрэг — гэрээний маргаан</option>
+            <option>Иргэний хэрэг — өмчийн маргаан</option>
+            <option>Хөдөлмөрийн маргаан</option>
+            <option>Гэр бүлийн маргаан</option>
+            <option>Арилжааны маргаан</option>
+            <option>Захиргааны маргаан</option>
+            <option>Эрүүгийн хэрэг</option></select></div>
+        <div><label class="lbl">AI загвар</label>
+          <select id="sm-m">
+            <option value="claude-opus-4-8">Opus — хамгийн сайн</option>
+            <option value="claude-sonnet-4-6" selected>Sonnet — нарийн (зөвлөмж)</option>
+            <option value="claude-haiku-4-5-20251001">Haiku — хурдан</option></select></div>
+      </div>
+      <label class="lbl">Хэргийн тодорхойлолт</label>
+      <textarea id="sm-d" placeholder="Хэргийн гол цөм, маргааны объект, хэн нэхэмжилсэн, юуг маргасан, ямар хуулийн заалт хамаарна гэж үзэж байгааг тодорхой бичнэ үү..."></textarea>
+    </div>
+    <button class="btn" id="sm-btn" onclick="doSimilar()">🔎 Ижил шийдвэр хайх</button>
+    <div class="card hidden" id="sm-load"><div class="spin-box"><div class="spinner"></div><p>Ижил төстэй шийдвэр хайж байна...</p></div></div>
+    <div class="result-card hidden" id="sm-res">
+      <div class="ct">🔎 Ижил төстэй шийдвэрүүд</div>
+      <div class="md-out" id="sm-out"></div>
+      <div class="linfo">💡 Шийдвэрүүдийг <strong>shuukh.mn</strong> болон <strong>legalinfo.mn</strong>-ээс нягтлаарай.</div>
+      <button class="btn-o" onclick="dlTxt('sm-out','ижил_шийдвэр')">⬇️ .txt татах</button>
+    </div>
+  </div>
+</div>
+</div><!-- /wrap -->
+
+<script>
+// ── marked.js тохиргоо ───────────────────────────
+if (typeof marked !== 'undefined') {
+  marked.setOptions({ breaks: true, gfm: true });
+}
+
+function renderMD(id, text) {
+  const el = document.getElementById(id);
+  if (typeof marked !== 'undefined') {
+    el.innerHTML = marked.parse(text);
+  } else {
+    el.textContent = text;
+  }
+}
+
+// ── PDF.js worker ────────────────────────────────
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+}
+
+// ── NAV ──────────────────────────────────────────
+function goSec(name, btn) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function goPane(prefix, name, btn) {
+  const parent = btn.closest('.sec') || btn.closest('[id^="sec-"]');
+  btn.parentElement.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const panes = document.querySelectorAll('[id^="'+prefix+'-"]');
+  panes.forEach(p => { if(p.classList.contains('pane')){ p.classList.remove('active'); p.classList.add('hidden'); }});
+  const t = document.getElementById(prefix+'-'+name);
+  if(t){ t.classList.remove('hidden'); t.classList.add('active'); }
+}
+
+// ── API KEY ──────────────────────────────────────
+window.onload = () => {
+  const k = localStorage.getItem('legal_v2_key');
+  if (k) { document.getElementById('apiKey').value = k; dot(true); }
+  // Setup drop zones (court sections: multiple files)
+  dz('rv-z','rv-f','rv-b','rv-fn','rv-t');
+  dz('sg-z','sg-f','sg-b','sg-fn','sg-t');
+  dz('cv-z','cv-f','cv-b','cv-fn',null,onCvFile);
+  dz('kb-z','kb-f','kb-b','kb-fn','kb-docs',null,true);
+  dz('kh-z','kh-f','kh-b','kh-fn','kh-docs',null,true);
+};
+
+function onKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  if (v.startsWith('sk-ant-') && v.length > 20) {
+    localStorage.setItem('legal_v2_key', v); dot(true);
+  } else dot(false);
+}
+
+function dot(ok) { document.getElementById('kd').className = 'key-dot'+(ok?' ok':''); }
+
+function getKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (!k || !k.startsWith('sk-ant-')) { alert('Дээрх талбарт Claude API key оруулна уу.'); return null; }
+  return k;
+}
+
+// ── DROP ZONES ───────────────────────────────────
+function dz(zid, fid, bid, fnid, taid, onFile, multiple) {
+  const z = document.getElementById(zid), fi = document.getElementById(fid);
+  if (!z||!fi) return;
+  if (multiple) fi.setAttribute('multiple','');
+  z.onclick = ()=>fi.click();
+  z.ondragover = e=>{ e.preventDefault(); z.classList.add('drag'); };
+  z.ondragleave = ()=>z.classList.remove('drag');
+  z.ondrop = e=>{ e.preventDefault(); z.classList.remove('drag'); handleFiles([...e.dataTransfer.files]); };
+  fi.onchange = e=>handleFiles([...e.target.files]);
+  async function handleFiles(files) {
+    if (!files||!files.length) return;
+    const names = files.map(f=>f.name).join(', ');
+    const totalKb = files.reduce((s,f)=>s+f.size,0)/1024;
+    if (bid) {
+      document.getElementById(fnid).textContent = names+' ('+totalKb.toFixed(0)+' KB)';
+      document.getElementById(bid).classList.remove('hidden');
+    }
+    if (onFile) { onFile(files); return; }
+    if (!taid) return;
+    const ta = document.getElementById(taid);
+    ta.value = '⏳ Файл уншиж байна...';
+    ta.disabled = true;
+    // Файл уншиж байх үед бүх холбоотой товчийг идэвхгүй болгоно
+    const relatedBtns = document.querySelectorAll(`[data-dz="${zid}"]`);
+    relatedBtns.forEach(b=>b.disabled=true);
+    // Textarea-тай холбогдох товч хайж хаана
+    const taEl = document.getElementById(taid);
+    const section = taEl ? taEl.closest('.pane, .card') : null;
+    const actionBtns = section ? section.querySelectorAll('button.btn, button.btn-o') : [];
+    actionBtns.forEach(b=>{ b._wasDisabled=b.disabled; b.disabled=true; });
+
+    let combined = '';
+    for (let i=0; i<files.length; i++) {
+      const f = files[i];
+      ta.value = `⏳ Файл ${i+1}/${files.length}: "${f.name}" уншиж байна...`;
+      const t = await readAnyDeep(f, (msg)=>{ ta.value = `⏳ [${i+1}/${files.length}] ${f.name}: ${msg}`; });
+      if (t && t.trim()) {
+        if (t.startsWith('[АЛДАА:')) {
+          combined += `\n\n=== ${f.name} — УНШИЖ ЧАДСАНГҮЙ ===\n${t}`;
+        } else {
+          combined += `\n\n=== ${f.name} ===\n${t.trim()}`;
+        }
+      }
+    }
+    ta.disabled = false;
+    // Товчнуудыг буцаана
+    actionBtns.forEach(b=>{ b.disabled=b._wasDisabled||false; delete b._wasDisabled; });
+    relatedBtns.forEach(b=>b.disabled=false);
+
+    const errMatches = combined.match(/\[АЛДАА:[^\]]+\]/g) || [];
+    const hasRealText = combined.replace(/=== .* — УНШИЖ ЧАДСАНГҮЙ ===[\s\S]*?\[АЛДАА:[^\]]+\]/g,'').trim().length > 20;
+    if (combined.trim()) {
+      ta.value = combined.trim();
+      if (errMatches.length > 0 && !hasRealText) {
+        const errDetail = errMatches.map(e=>e.replace('[АЛДАА:','').replace(']','')).join('\n');
+        alert('⚠️ Файл уншиж чадсангүй.\n\nАлдаа:\n' + errDetail + '\n\nШийдэл:\n• Хэрэв "Failed to fetch" бол GitHub Pages дээрх линкийг ашиглана уу (file:// биш)\n• Хэрэв "pdfjsLib" бол хуудсыг F5 дарж дахин ачааллана уу\n• Хэрэв "out of memory" бол файлын хэмжээ хэт том байна');
+      } else if (errMatches.length > 0) {
+        alert('Зарим файл амжилттай уншигдлаа. Уншигдаагүй файлуудын алдаа:\n' + errMatches.join('\n'));
+      }
+    } else {
+      ta.value = '';
+      alert('⚠️ Файлаас текст гарган авч чадсангүй.\n\nПDF зурагт хэлбэрт байвал Vision API ашигладаг.\nAPI key зөв оруулсан болон интернэт холболт шалгаарай.');
+    }
+  }
+}
+
+// PDF-ийн текст цөөн байвал автоматаар Vision-д шилждэг
+async function readAnyDeep(f, statusCb) {
+  if (!f) return '';
+  try {
+    if (f.name.match(/\.txt$/i)) return await f.text();
+    if (f.name.match(/\.docx?$/i)) {
+      statusCb && statusCb('Word задалж байна...');
+      const b = await f.arrayBuffer();
+      return (await mammoth.extractRawText({arrayBuffer:b})).value;
+    }
+    if (f.name.match(/\.pdf$/i)) {
+      if (typeof pdfjsLib === 'undefined') throw new Error('PDF уншигч (PDF.js) ачаалагдаагүй байна. Хуудсыг дахин ачааллана уу (F5).');
+      statusCb && statusCb('PDF текст уншиж байна...');
+      const text = await readPDF(f);
+      const buf = await f.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+      const avgChars = text.length / Math.max(pdf.numPages, 1);
+      // Текст бараг байхгүй үед л Vision ашиглах (< 5 тэмдэгт/хуудас)
+      if (avgChars < 5) {
+        statusCb && statusCb('Зурган PDF — Vision ашиглаж байна (хамгийн ихдээ 50 хуудас)...');
+        return await pdfVisionAll(f, statusCb, 50);
+      }
+      return text;
+    }
+    if (f.name.match(/\.(png|jpg|jpeg)$/i)) {
+      statusCb && statusCb('Зураг Vision-оор уншиж байна...');
+      return await imgVision(f);
+    }
+  } catch(e) {
+    statusCb && statusCb('Алдаа: '+e.message);
+    return `[АЛДАА: ${e.message}]`;
+  }
+  return '';
+}
+
+async function readAny(f) {
+  try {
+    if (f.name.match(/\.txt$/i)) return await f.text();
+    if (f.name.match(/\.docx?$/i)) { const b=await f.arrayBuffer(); return (await mammoth.extractRawText({arrayBuffer:b})).value; }
+    if (f.name.match(/\.pdf$/i)) return await readPDF(f);
+  } catch(e) { alert('Файл унших алдаа: '+e.message); }
+  return '';
+}
+
+async function readPDF(f) {
+  if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js ачаалагдаагүй. F5 дарж хуудсыг дахин ачааллана уу.');
+  const buf = await f.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  let out = '';
+  for (let i=1;i<=pdf.numPages;i++) {
+    const pg = await pdf.getPage(i);
+    const ct = await pg.getTextContent();
+    out += ct.items.map(s=>s.str).join(' ')+'\n';
+  }
+  return out.trim();
+}
+
+async function readImgB64(f) {
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(f); });
+}
+
+// ── CLAUDE API CALL ──────────────────────────────
+async function claude(model, prompt, imgB64, imgMime, maxTok) {
+  const key = getKey(); if (!key) throw new Error('API key байхгүй');
+  const content = [];
+  if (imgB64) content.push({type:'image',source:{type:'base64',media_type:imgMime,data:imgB64}});
+  content.push({type:'text',text:prompt});
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model, max_tokens: maxTok||4096, messages:[{role:'user',content}]})
+  });
+  if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e.error?.message||'API алдаа '+r.status); }
+  return (await r.json()).content[0].text;
+}
+
+function loading(lid, rid, on) {
+  document.getElementById(lid).classList.toggle('hidden',!on);
+  if (!on) document.getElementById(rid).classList.remove('hidden');
+}
+
+// ══════════════════════════════════
+// CONTRACT REVIEW
+// ══════════════════════════════════
+async function doReview() {
+  const text = document.getElementById('rv-t').value.trim();
+  if (!text) { alert('Гэрээний текст оруулна уу'); return; }
+  const model = document.getElementById('rv-m').value;
+  const ct = document.getElementById('rv-ct').value;
+  const j  = document.getElementById('rv-j').value;
+  const jScope = j==='mn' ? 'Монголын хууль (legalinfo.mn)'
+    : j==='intl' ? 'Олон улсын стандарт: CISG, UNIDROIT Зарчмууд, ICC'
+    : 'Монголын хууль (legalinfo.mn) болон олон улсын стандарт (CISG, UNIDROIT)';
+
+  const prompt = `Та Монголын гэрээний хуулийн мэргэжилтэн юм.
+Доорх гэрээг нарийвчлан шинжилж дэлгэрэнгүй хяналтын тайлан бэлтгэнэ үү.${ct!=='auto'?` Гэрээний төрөл: ${ct}.`:''}
+Хуулийн хүрээ: ${jScope}
+
+ЧУХАЛ:
+- Хяналтад хамааруулах хуулиудыг гэрээний АГУУЛГА, БАЙГАЛИАС нь тодорхойлно уу. Жишээлбэл: ажил гүйцэтгэх гэрээнд Иргэний хууль, Компанийн хууль, салбарын тусгай хууль хамаарна. Хөдөлмөрийн гэрээнд Хөдөлмөрийн хууль хамаарна. Тухайн гэрээний агуулгад огт хамааралгүй хуулийг дурдахгүй.
+- Тайланг зөв, байгалийн Монгол хэлээр (эсвэл гэрээний хэлээр) бичнэ үү.
+- legalinfo.mn дэх хүчинтэй хуулийн яг нэр, зүйл, хэсгийг дурдана уу.
+
+---
+${text.slice(0,14000)}
+---
+
+Доорх бүтцээр ДЭЛГЭРЭНГҮЙ тайлан бичнэ үү:
+
+# ГЭРЭЭНИЙ ХЯНАЛТЫН ТАЙЛАН
+
+## Ерөнхий мэдээлэл
+| Зүйл | Утга |
+|------|------|
+| Гэрээний төрөл | |
+| Хэл | |
+| Хянасан огноо | ${new Date().toLocaleDateString('mn-MN')} |
+| Ерөнхий үнэлгээ (оноо /100) | |
+
+## Ерөнхий дүгнэлт
+(2–3 өгүүлбэрт хяналтын ерөнхий дүн)
+
+## 🔴 Өндөр эрсдэлтэй заалтууд
+(Хуулийн зөрчил эсвэл том эрсдэл бүхий заалт бүрийг дэлгэрэнгүй задлана уу)
+
+### [Асуудлын нэр]
+- **Холбогдох заалт:** (аль зүйл, хэсэг)
+- **Асуудал:** (яагаад хуулийн зөрчил эсвэл эрсдэлтэй вэ — тодорхой тайлбарлана уу)
+- **Засварын санал:** (хэрхэн засах, яг ямар текст болгох)
+- **Хуулийн үндэслэл:** (legalinfo.mn-ийн хуулийн яг нэр, зүйл, хэсэг)
+
+## 🟡 Засвар шаардлагатай заалтууд
+(Дунд зэргийн эрсдэл, сул заалтуудыг мөн дэлгэрэнгүй задлана уу)
+
+### [Асуудлын нэр]
+- **Холбогдох заалт:**
+- **Асуудал:**
+- **Засварын санал:**
+- **Хуулийн үндэслэл:**
+
+## 🔵 Сайжруулах боломжтой заалтууд
+
+## ❌ Дутуу стандарт заалтууд
+(Монголын хуулийн дагуу байх ёстой боловч гэрээнд тусгаагүй заалтууд)
+
+| Дутуу заалт | Яагаад байх ёстой | Хуулийн үндэслэл |
+|-------------|-------------------|-----------------|
+
+## ✅ Хүчтэй, сайн заалтууд
+(Зөв боловсруулсан, хуульд нийцсэн заалтуудыг тэмдэглэнэ үү)
+
+## Нийт зөвлөмж ба цаашдын алхам`;
+
+  setBtnDisabled('rv-btn',true);
+  loading('rv-load','rv-res',true);
+  document.getElementById('rv-res').classList.add('hidden');
+  try {
+    const r = await claude(model, prompt);
+    renderMD('rv-out', r);
+    loading('rv-load','rv-res',false);
+    document.getElementById('rv-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('rv-load').classList.add('hidden'); }
+  setBtnDisabled('rv-btn',false);
+}
+
+// ══════════════════════════════════
+// CONTRACT SUGGEST
+// ══════════════════════════════════
+async function doSuggest() {
+  const text = document.getElementById('sg-t').value.trim();
+  if (!text) { alert('Гэрээний текст оруулна уу'); return; }
+  const model = document.getElementById('sg-m').value;
+  const side  = document.getElementById('sg-s').value;
+  const dir   = document.getElementById('sg-dir').value;
+  const sideLabel = side==='party1'?'Нэхэмжлэгч/нэг талын ашгийг хамгаалах чиглэлд':
+    side==='party2'?'Хариуцагч/нөгөө талын ашгийг хамгаалах чиглэлд':'Хоёр талд тэнцвэртэй';
+
+  const prompt = `Та Монголын гэрээний хуулийн мэргэжлийн зөвлөх юм.
+${sideLabel} дараах гэрээнд засвар, нэмэлт оруулах санал боловсруулна уу.${dir?`\nОнцлог хүсэлт: ${dir}`:''}
+legalinfo.mn дээрх Монголын хүчинтэй хуулиудад үндэслэнэ үү.
+Хариултыг гэрээний хэлбэрт тохируулна уу.
+
+---
+${text.slice(0,12000)}
+---
+
+Доорх бүтцээр засварын санал боловсруулна уу:
+
+# ГЭРЭЭНИЙ ЗАСВАРЫН САНАЛ
+
+## Нийт үнэлгээ ба засварын чиглэл
+
+## Заалт тус бүрийн засварын санал
+
+### [Заалтын дугаар/нэр] — [Асуудлын нэр]
+
+**Одоогийн текст:**
+> (гэрээнээс яг тухайн заалтыг хуулж бичнэ)
+
+**Засварын санал:**
+> (шинэ, засагдсан текст — гэрээнд шууд оруулах хэлбэрт бичнэ)
+
+**Засварын шалтгаан:**
+(яагаад засах шаардлагатай, ямар эрсдэлийг арилгаж байгаа)
+
+**Хуулийн үндэслэл:** [legalinfo.mn-ийн хуулийн нэр, зүйл]
+
+---
+
+## Нэмэх шаардлагатай шинэ заалтууд
+(одоо байхгүй боловч нэмэхийг зөвлөж буй заалт бүрт бэлэн текст санал болгоно)
+
+### [Нэмэх заалтын нэр]
+**Санал болгосон текст:**
+> (гэрээнд шууд оруулах бэлэн текст)
+
+**Нэмэх шалтгаан:**
+**Хуулийн үндэслэл:**
+
+## Устгах/Хөнгөвчлөх заалтууд
+
+## Эцсийн зөвлөмж`;
+
+  setBtnDisabled('sg-btn',true);
+  loading('sg-load','sg-res',true);
+  document.getElementById('sg-res').classList.add('hidden');
+  try {
+    const r = await claude(model, prompt);
+    renderMD('sg-out', r);
+    loading('sg-load','sg-res',false);
+    document.getElementById('sg-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('sg-load').classList.add('hidden'); }
+  setBtnDisabled('sg-btn',false);
+}
+
+// ══════════════════════════════════
+// CONTRACT DRAFT
+// ══════════════════════════════════
+async function doDraft() {
+  const p1 = document.getElementById('dr-p1').value;
+  const p2 = document.getElementById('dr-p2').value;
+  if (!p1||!p2) { alert('Талуудын нэрийг оруулна уу'); return; }
+  const model = document.getElementById('dr-m').value;
+  const ct    = document.getElementById('dr-t').value;
+  const lang  = document.getElementById('dr-l').value;
+  const det   = document.getElementById('dr-d').value;
+  const ll = lang==='mn'?'Монгол хэлээр':lang==='en'?'English language':'Монгол болон Англи хоёр хэлээр давхар (МН/EN хавсарсан)';
+
+  const prompt = `Та Монголын хуулийн мэргэжлийн зөвлөх юм.
+Доорх мэдээлэлд үндэслэн ${ct} боловсруулна уу.
+Хэл: ${ll}
+legalinfo.mn дээрх Монголын хүчинтэй хуулиудад нийцсэн бүрэн, хуулийн хүчин төгөлдөр гэрээний төсөл бичнэ үү.
+
+НЭГ ТАЛ: ${p1}
+НӨГӨӨ ТАЛ: ${p2}
+ГОЛ НӨХЦӨЛ: ${det}
+
+Гэрээний бүтэц:
+**ГЭРЭЭ**
+Огноо: ___, газар: ___
+
+**1. НЭР ТОМЬЁО, ТОДОРХОЙЛОЛТ**
+**2. ГЭРЭЭНИЙ ЗҮЙ, АГУУЛГА**
+**3. ҮНЭ, ТӨЛБӨРИЙН НӨХЦӨЛ**
+**4. ТАЛУУДЫН ЭРХ, ҮҮРЭГ**
+**5. ГЭРЭЭНИЙ ХУГАЦАА**
+**6. ХАРИУЦЛАГА, ТОРГУУЛЬ**
+**7. ДАВАГДАШГҮЙ ХҮЧИН ЗҮЙЛ (FORCE MAJEURE)**
+**8. НУУЦЛАЛ**
+**9. МАРГААН ШИЙДВЭРЛЭХ ЖУРАМ**
+**10. ГЭРЭЭ ЦУЦЛАХ ҮНДЭСЛЭЛ**
+**11. БУСАД НӨХЦӨЛ**
+**12. ТАЛУУДЫН МЭДЭЭЛЭЛ, ГАРЫН ҮСЭГ**
+
+Гэрээний хуулийн үндэслэлийг (legalinfo.mn зүйл, хэсэг) холбогдох заалт бүрд тэмдэглэнэ үү.`;
+
+  setBtnDisabled('dr-btn',true);
+  loading('dr-load','dr-res',true);
+  document.getElementById('dr-res').classList.add('hidden');
+  try {
+    const r = await claude(model, prompt);
+    renderMD('dr-out', r);
+    loading('dr-load','dr-res',false);
+    document.getElementById('dr-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('dr-load').classList.add('hidden'); }
+  setBtnDisabled('dr-btn',false);
+}
+
+// ══════════════════════════════════
+// FILE CONVERT
+// ══════════════════════════════════
+let cvFile = null;
+
+function onCvFile(files) {
+  cvFile = Array.isArray(files) ? files[0] : files;
+  document.getElementById('cv-opts').classList.remove('hidden');
+  if (cvFile && cvFile.name.match(/\.(png|jpg|jpeg)$/i)) document.getElementById('cv-ol').value = 'claude';
+}
+
+function cvSt(msg) { document.getElementById('cv-st').textContent = msg; }
+
+async function doConvert() {
+  if (!cvFile) { alert('Файл сонгоно уу'); return; }
+  const lang = document.getElementById('cv-ol').value;
+  setBtnDisabled('cv-btn',true);
+  loading('cv-load','cv-res',true);
+  document.getElementById('cv-res').classList.add('hidden');
+  let text = '';
+  try {
+    if (cvFile.name.match(/\.txt$/i)) {
+      cvSt('Текст уншиж байна...');
+      text = await cvFile.text();
+    } else if (cvFile.name.match(/\.docx?$/i)) {
+      cvSt('Word файл задалж байна...');
+      const b=await cvFile.arrayBuffer();
+      text=(await mammoth.extractRawText({arrayBuffer:b})).value;
+    } else if (cvFile.name.match(/\.pdf$/i)) {
+      cvSt('PDF текст задалж байна...');
+      text = await readPDF(cvFile);
+      // Хэрэв текст маш цөөн байвал (зурган PDF) → Claude Vision ашиглах
+      const buf = await cvFile.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+      const avgCharsPerPage = text.length / pdf.numPages;
+      if (avgCharsPerPage < 5) {
+        cvSt('Зурган PDF илэрлэв — Claude Vision ашиглаж байна...');
+        text = await pdfVisionAll(cvFile, cvSt);
+      }
+    } else if (cvFile.name.match(/\.(png|jpg|jpeg)$/i)) {
+      if (lang==='claude') {
+        cvSt('Claude Vision-оор текст гарган авч байна...');
+        text = await imgVision(cvFile);
+      } else {
+        cvSt('Tesseract OCR-ээр боловсруулж байна...');
+        text = await imgOCR(cvFile, lang);
+      }
+    }
+    if (!text||text.trim().length<3) text = '[Текст гарган авах боломжгүй байна]';
+    document.getElementById('cv-out').textContent = text;
+    loading('cv-load','cv-res',false);
+    document.getElementById('cv-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('cv-load').classList.add('hidden'); }
+  setBtnDisabled('cv-btn',false);
+}
+
+async function imgVision(f) {
+  const b64=await readImgB64(f), mime=f.type||'image/jpeg', key=getKey();
+  if(!key) throw new Error('API key байхгүй');
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4096,messages:[{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+      {type:'text',text:'Энэ зурган дахь бүх текстийг яг эх хэлбэрээр, формат хадгалан гарган ав. Зөвхөн текст, тайлбаргүй. Монгол үгийг гажуудуулахгүй, яг байгаагаар нь бич.'}
+    ]}]})});
+  const d=await r.json(); return d.content[0].text;
+}
+
+// Бүх хуудасны Vision — 3 хуудсыг нэг дуудалтаар илгээнэ
+async function pdfVisionAll(f, statusCb, maxPages) {
+  const key=getKey(); if(!key) return '[API key байхгүй]';
+  const stFn = statusCb || cvSt;
+  const buf=await f.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const total = maxPages ? Math.min(pdf.numPages, maxPages) : pdf.numPages;
+  let allText='';
+  const batchSize=5; // 3→5: дуудалт 40% цөөрнө
+
+  for(let start=1; start<=total; start+=batchSize){
+    const end=Math.min(start+batchSize-1,total);
+    stFn(`Хуудас ${start}–${end} / ${total} боловсруулж байна...`);
+
+    const content=[];
+    for(let p=start; p<=end; p++){
+      const page=await pdf.getPage(p);
+      const vp=page.getViewport({scale:1.4});
+      const cv=document.createElement('canvas');
+      cv.width=vp.width; cv.height=vp.height;
+      await page.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+      const b64=cv.toDataURL('image/jpeg',0.8).split(',')[1];
+      content.push({type:'text',text:`=== Хуудас ${p} ===`});
+      content.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}});
+    }
+    content.push({type:'text',text:'Дээрх '+Math.min(batchSize,total-start+1)+' хуудасны бүх текстийг яг эх хэлбэрээр гарган ав. Монгол үгийг гажуудуулахгүй. Хуудас бүрийн эхэнд "=== Хуудас N ===" гэж тэмдэглэ. Зөвхөн текст, тайлбаргүй.'});
+
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:4096,messages:[{role:'user',content}]})
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message);
+    allText+=d.content[0].text+'\n\n';
+  }
+  return allText.trim();
+}
+
+async function imgOCR(f, lang) {
+  if(typeof Tesseract==='undefined') throw new Error('Tesseract ачаалагдаагүй');
+  const lmap={'mn+eng':'mon+eng','eng':'eng','mn':'mon'};
+  const result=await Tesseract.recognize(f,lmap[lang]||'mon+eng',{
+    logger:m=>{ if(m.status==='recognizing text') cvSt('OCR: '+Math.round(m.progress*100)+'%'); }});
+  return result.data.text;
+}
+
+// ══════════════════════════════════
+// COURT BRIEF
+// ══════════════════════════════════
+async function doBrief() {
+  const docs = document.getElementById('kb-docs').value.trim();
+  const hasFile = !document.getElementById('kb-b').classList.contains('hidden');
+  if (!docs && !hasFile) { alert('Файл оруулах эсвэл текст бичнэ үү'); return; }
+  if (!docs) { alert('Файл уншигдсан боловч текст хоосон байна. Файлыг дахин оруулна уу.'); return; }
+  const model  = document.getElementById('kb-m').value;
+  const court  = document.getElementById('kb-court').value;
+  const caseNo = document.getElementById('kb-no').value;
+  const pl     = document.getElementById('kb-pl').value;
+  const df     = document.getElementById('kb-df').value;
+  const claim  = document.getElementById('kb-cl').value;
+
+  const prompt = `Та туршлагатай өмгөөлөгч буюу хуулийн зөвлөх юм.
+Доорх хэргийн материалд үндэслэн хэргийн дэлгэрэнгүй товьёог бэлдэнэ үү. Мэдэгдэхгүй зүйлийг "–" гэж тэмдэглэ.
+Анхаарамж, дутлагдын хүснэгт гаргахгүй — байгаа материалаар шууд боловсруулна уу.
+legalinfo.mn дээрх хүчинтэй Монголын хуулиудыг ашиглана уу.
+
+ХЭРГИЙН МЭДЭЭЛЭЛ:
+Шүүх: ${court||'–'}  |  Хэргийн дугаар: ${caseNo||'–'}
+Нэхэмжлэгч: ${pl||'–'}  |  Хариуцагч: ${df||'–'}
+Нэхэмжлэлийн шаардлага: ${claim||'–'}
+
+ХЭРГИЙН МАТЕРИАЛ:
+---
+${docs.slice(0,13000)}
+---
+
+Доорх жишгийн дагуу ДЭЛГЭРЭНГҮЙ товьёог бэлдэнэ үү:
+
+# ХЭРГИЙН ДЭЛГЭРЭНГҮЙ ТОВЬЁОГ
+
+## Хэргийн хүснэгт
+| Зүйл | Утга |
+|------|------|
+| Шүүх | |
+| Хэргийн дугаар | |
+| Нэхэмжлэгч | |
+| Хариуцагч | |
+| Нэхэмжлэлийн шаардлага | |
+| Хэргийн одоогийн шат | |
+
+## 0. Процессын одоогийн байдал
+
+### 0.1 Бидэнд ашигтай, аль хэдийн тогтоогдсон үйл баримт
+(материалаас гарган авч, тодорхой баримт дугаарлан жагсаана уу)
+
+### 0.2 Эсрэг талын аргумент ба тулгамдаж буй асуудлууд
+
+## 1. Хэргийн он цагийн дараалал (хүснэгт)
+| Огноо | Үйл явдал | Баримт / Байршил |
+|-------|-----------|-----------------|
+(хэргийн материалаас гарган авсан бүх үйл явдлыг дарааллаар бичнэ)
+
+## 2. Нотлох баримтын шинжилгээ
+| Нотлох баримт | Юу нотлох | Хуулийн ач холбогдол | Байршил/Төлөв |
+|---------------|-----------|---------------------|--------------|
+
+## 3. Хуулийн үндэслэл
+(legalinfo.mn-ийн яг хуулийн нэр, зүйл, хэсгийг дурдан тайлбарлана уу)
+
+## 4. Байр суурь ба стратеги
+
+## 5. Эрсдэл, сул тал ба бэлтгэл`;
+
+  setBtnDisabled('kb-btn',true);
+  loading('kb-load','kb-res',true);
+  document.getElementById('kb-res').classList.add('hidden');
+  try {
+    const r = await claude(model, prompt, null, null, 8192);
+    renderMD('kb-out', r);
+    loading('kb-load','kb-res',false);
+    document.getElementById('kb-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('kb-load').classList.add('hidden'); }
+  setBtnDisabled('kb-btn',false);
+}
+
+// ══════════════════════════════════
+// AUTO-FILL HEARING INFO FROM DOCS
+// ══════════════════════════════════
+async function autoFillHearing() {
+  const docs = document.getElementById('kh-docs').value.trim();
+  if (!docs) { alert('Эхлээд файл оруулна уу.\n\nФайлын дохио харагдаж байгаа бол хүлээгээрэй — PDF/Vision уншилт хэдэн минут үргэлжлэх тул бэлэн болмогц товчийг дарна уу.'); return; }
+  setBtnDisabled('kh-auto', true);
+  document.getElementById('kh-auto').textContent = '⏳ Уншиж байна...';
+  try {
+    const key = getKey(); if (!key) throw new Error('key байхгүй');
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:512,messages:[{role:'user',content:[{type:'text',text:
+        `Дараах хэргийн материалаас мэдээллийг гарган авч JSON форматаар хариулна уу.
+Зөвхөн JSON, тайлбаргүй:
+{"court":"шүүхийн нэр","case_no":"хэргийн дугаар","plaintiff":"нэхэмжлэгч","defendant":"хариуцагч","judge":"шүүгчийн нэр эсвэл хоосон","position":"хуулийн тусгай хүсэлт эсвэл чиглэл"}
+
+МАТЕРИАЛ:
+---
+${docs.slice(0,4000)}
+---`}]}]})
+    });
+    const d = await r.json();
+    const txt = d.content[0].text.trim();
+    const m = txt.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('JSON олдсонгүй');
+    const info = JSON.parse(m[0]);
+    if (info.judge) document.getElementById('kh-jd').value = info.judge;
+    if (info.position) document.getElementById('kh-pos').value = info.position;
+    // Brief fields also if open
+    if (info.court) { const el=document.getElementById('kb-court'); if(el&&!el.value) el.value=info.court; }
+    if (info.case_no) { const el=document.getElementById('kb-no'); if(el&&!el.value) el.value=info.case_no; }
+    if (info.plaintiff) { const el=document.getElementById('kb-pl'); if(el&&!el.value) el.value=info.plaintiff; }
+    if (info.defendant) { const el=document.getElementById('kb-df'); if(el&&!el.value) el.value=info.defendant; }
+    document.getElementById('kh-auto').textContent = '✅ Бөглөгдлөө';
+  } catch(e) {
+    alert('Автомат бөглөх алдаа: '+e.message);
+    document.getElementById('kh-auto').textContent = '🔍 Мэдээлэл автоматаар бөглөх';
+  }
+  setBtnDisabled('kh-auto', false);
+}
+
+// ══════════════════════════════════
+// COURT HEARING PREP — ЭТНО загвараар
+// ══════════════════════════════════
+async function doHearing() {
+  const docs = document.getElementById('kh-docs').value.trim();
+  if (!docs) { alert('Файл оруулах эсвэл текст paste хийнэ үү'); return; }
+  const model = document.getElementById('kh-m').value;
+  const dt    = document.getElementById('kh-dt').value;
+  const jd    = document.getElementById('kh-jd').value;
+  const pos   = document.getElementById('kh-pos').value;
+
+  const today_mn = new Date().toLocaleDateString('mn-MN');
+
+  const prompt = `Та туршлагатай, мэргэшсэн өмгөөлөгч юм.
+Доорх хэргийн материалыг уншаад шүүх хуралдааны өмгөөллийн дотоод бэлтгэлийн материал боловсруулна уу.
+
+ЧУХАЛ ЗААВРУУД:
+- Материалд байгаа бүх мэдээллийг ДЭЛГЭРЭНГҮЙ гарган ав. Мэдэгдэхгүй зүйлийг "–" гэж тэмдэглэ.
+- "Анхаарамж", "Дутлагдлын хүснэгт", "материал хүрэлцэхгүй" зэрэг мессеж ОГТХОН ГАРГАХГҮЙ.
+- Материал нь PDF OCR-оор уншсан тул зарим үг буруу байж болно — хуулийн зөв нэр томьёогоор засаж бич (жишээ: "тэмдэгтийн хураамж", "нэхэмжлэлийн шаардлага", "худалдах-худалдан авах гэрээ", "хөрөнгө хүлээлцэх акт").
+- Зөв, байгалийн Монгол хуулийн хэлээр бич. Буруу OCR үгийг давтахгүй.
+- legalinfo.mn-ийн хүчинтэй хуулиудыг яг хуулийн нэр, зүйл, хэсгийн дугаарын хамт дурдана уу.
+- Бүх хэсэг (0-8) дүүрэн байх ёстой. Товч бичихгүй — нарийн дэлгэрэнгүй бич.
+
+Хуралдааны огноо: ${dt||'–'}  |  Шүүгч: ${jd||'–'}
+Байр суурь: ${pos||'Мэдэгдээгүй'}
+
+ХЭРГИЙН МАТЕРИАЛ:
+---
+${docs.slice(0,14000)}
+---
+
+Доорх загварын дагуу БҮРЭН дүүрэн, НАРИЙН ДЭЛГЭРЭНГҮЙ боловсруулна уу. Бүх хүснэгтийг материалаас гарган авсан БОДИТ мэдээллээр дүүргэнэ үү:
+
+# ӨМГӨӨЛЛИЙН ДОТООД БЭЛТГЭЛ
+
+## Шүүх хуралдаан дахь өмгөөлөл
+
+| Зүйл | Утга |
+|------|------|
+| Шүүх | (материалаас гарган авна) |
+| Хэргийн дугаар | (материалаас гарган авна) |
+| Хуралдааны огноо | ${dt||'–'} |
+| Шүүгч | ${jd||'–'} |
+| Нэхэмжлэгч / Өмгөөлөгч | (материалаас гарган авна) |
+| Хариуцагч | (материалаас гарган авна) |
+| Нэхэмжлэлийн шаардлага | (материалаас гарган авна — бүрэн, нарийн) |
+| Бэлтгэсэн | ${today_mn} |
+
+---
+
+## 0. Процессын одоогийн байдал
+
+### 0.1 Бидэнд ашигтай, аль хэдийн тогтоогдсон үйл баримт
+
+(Материалаас гарган авсан БОДИТ баримт, тогтоосон үйл явдал, шийдвэрийн дугаар, огноо бүхий дэлгэрэнгүй жагсаалт. Дор хаяж 5–10 зүйл.)
+
+- **[огноо]** — [тодорхой үйл баримт — баримтын дугаар, хэлцлийн нэр, шийдвэрийн дугаар зэрэг дурдана]
+- **[огноо]** — [үйл баримт]
+(материалд байгаа бүх тогтоогдсон баримтыг жагсаана)
+
+### 0.2 Давж заалдах шатны буцаасан үндэслэл / Шийдвэрлэх асуудлууд
+
+(Энэ хуралдаанд шийдвэрлэх гол маргааны цэгүүд, эсрэг талын аргумент, тодорхой тайлбарлана уу)
+
+---
+
+## 1. Хэргийн он цагийн дараалал
+
+| Огноо | Үйл явдал | Баримт / Байршил |
+|-------|-----------|-----------------|
+(материалд байгаа БҮХ чухал үйл явдлыг он цагийн дарааллаар — огноо, нэр баримт хамт)
+
+---
+
+## 2. Хариуцагч / гуравдагч этгээдэд асуух асуулт
+
+(Материалд дурдагдсан этгээд бүрд тусдаа хэсэг. Асуулт бүр стратегийн зорилготой — хариуцагчид тохиромжгүй баримт гаргуулах, зөрчилтэй мэдэгдэл хийлгэх зорилготой байна.)
+
+### [Этгээдийн нэр]-д асуух асуулт:
+1. [Тодорхой стратегийн асуулт — баримт дугаар, огноо хамт]
+2. [Асуулт]
+3. [Асуулт]
+4. [Асуулт]
+5. [Асуулт]
+
+---
+
+## 3. Нотлох баримтын шинжилгээ
+
+| Нотлох баримт | Юу нотлох | Хуралдаанд хэрхэн ашиглах | Төлөв / Байршил |
+|---------------|-----------|--------------------------|----------------|
+(материалд байгаа БҮХ нотлох баримтыг жагсаана — баримтын нэр, дугаар, огноо хамт)
+
+---
+
+## 4. Хуулийн үндэслэл
+
+| Хуулийн нэр (legalinfo.mn) | Зүйл, хэсэг | Хэрэгт хэрхэн хамаарах |
+|---------------------------|-------------|------------------------|
+(таны байр суурийг дэмжих хуулийн заалт бүрийг жагсаана)
+
+---
+
+## 5. Эсрэг талын аргумент ба бидний хариу
+
+| Эсрэг талын аргумент | Бидний хариу | Ашиглах нотлох баримт |
+|---------------------|-------------|----------------------|
+(материал болон хэргийн нөхцөл байдалд тулгуурлан гурваас доошгүй аргумент)
+
+---
+
+## 6. Шүүгчийн болзошгүй асуулт ба бэлтгэл хариу
+
+1. **Асуулт:** [шүүгчийн болзошгүй асуулт]
+   **Хариу:** [бэлтгэсэн хариу — нотлох баримт, хуулийн заалт хамт]
+2. **Асуулт:**
+   **Хариу:**
+3. **Асуулт:**
+   **Хариу:**
+
+---
+
+## 7. Эрсдэл, сул тал ба бэлтгэл
+
+| Эрсдэл / Сул тал | Ноцтой байдал | Эрсдэл бууруулах арга |
+|------------------|--------------|----------------------|
+
+---
+
+## 8. Хуралдааны дараа хийх ажиллагаа
+
+(Хуралдааны үр дүнд хамааран хийх ёстой алхамуудыг жагсаана)`;
+
+  setBtnDisabled('kh-btn',true);
+  loading('kh-load','kh-res',true);
+  document.getElementById('kh-res').classList.add('hidden');
+  try {
+    const r = await claude(model, prompt, null, null, 8192);
+    renderMD('kh-out', r);
+    loading('kh-load','kh-res',false);
+    document.getElementById('kh-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('kh-load').classList.add('hidden'); }
+  setBtnDisabled('kh-btn',false);
+}
+
+// ══════════════════════════════════
+// SIMILAR CASES
+// ══════════════════════════════════
+async function doSimilar() {
+  const desc = document.getElementById('sm-d').value.trim();
+  if (!desc) { alert('Хэргийн тодорхойлолт оруулна уу'); return; }
+  const model = document.getElementById('sm-m').value;
+  const type  = document.getElementById('sm-t').value;
+
+  // Хайлтын URL-д ашиглах keyword
+  const searchKeywords = encodeURIComponent(desc.substring(0,60).replace(/\n/g,' '));
+  const typeKeyword = encodeURIComponent(type);
+
+  const prompt = `Та Монголын эрх зүйн мэргэжилтэн юм. ЧУХАЛ ДҮРМҮҮД:
+
+1. ХЭЗЭЭ Ч хуурамч шийдвэрийн дугаар, хуурамч хэргийн нэр БҮҮР ГАРГАХ. Бодит дугаар мэдэхгүй бол "дугаарыг shuukh.mn-ээс шалгах шаардлагатай" гэж тэмдэглэ.
+2. ЗӨВХӨН эдгээр зөв шүүхийн нэрийг ашиглана: "анхан шатны шүүх", "давж заалдах шатны шүүх", "Монгол Улсын Дээд шүүх". "Төв шүүх", "Апиляц шүүх", "Төвлөрсөн шүүх" гэдэг нь БАЙХГҮЙ, хэзээ ч ашиглахгүй.
+3. ЗӨВХӨН legalinfo.mn дээр бодитоор байдаг хуулийн нэрийг ашиглана (Монгол Улсын Иргэний хууль, Иргэний хэрэг шүүхэд хянан шийдвэрлэх тухай хууль, Компанийн тухай хууль, Хөдөлмөрийн тухай хууль, Газрын тухай хууль, Гэр бүлийн тухай хууль, Хэрэглэгчийн эрхийг хамгаалах тухай хууль, Арбитрын тухай хууль гэх мэт). Оршихгүй хуулийн нэр ГАРГАХГҮЙ.
+4. Биечлэн shuukh.mn дээр хандах боломжгүй тул бодит шийдвэрийн дугаар мэдэхгүй. Харин хайлтын стратеги, линк өгнө.
+
+Хэргийн ангилал: ${type}
+Хэргийн тодорхойлолт: ${desc}
+
+# ИЖИЛ ШҮҮХИЙН ШИЙДВЭРИЙН СУДАЛГАА
+
+## 1. Таны хэрэгт хамаарах БОДИТ хуулийн заалтууд
+
+(ЗӨВХӨН legalinfo.mn-д байгаа бодит хуулийн нэрийг хэрэглэ)
+
+| Хуулийн нэр | Зүйл, хэсэг, заалт | Таны хэрэгт хамаарах байдал |
+|------------|-------------------|---------------------------|
+| [бодит хуулийн нэр] | [жишээ: 281 дүгээр зүйлийн 281.1] | [яаж хамаарах] |
+
+---
+
+## 2. shuukh.mn дээрх ХАЙЛТЫН ЛИНКҮҮД
+
+Доорх линкүүд дээр дарж shuukh.mn-ийн мэдээллийн санд шууд хайлт хийнэ үү:
+
+**Үндсэн хайлт:**
+[🔎 shuukh.mn-д "**${type}**" хайх](https://www.shuukh.mn/home/search?q=${typeKeyword})
+
+**Нарийн хайлт:**
+[🔎 shuukh.mn-д хэргийн дэлгэрэнгүй хайлт](https://www.shuukh.mn/home/search?q=${searchKeywords})
+
+**Монгол Улсын Дээд шүүх:**
+[🏛️ Дээд шүүхийн мэдээллийн сан](https://supremecourt.mn/mn/content/145)
+
+---
+
+## 3. Энэ төрлийн хэрэгт Монголын шүүхийн ТҮГЭЭМЭЛ ШИЙДВЭРЛЭХ ХАНДЛАГА
+
+(Бодит хэргийн дугаар гаргахгүй. Монголын шүүхийн практикт энэ төрлийн маргаанд ямар хандлага давамгайлдагийг дүрслэн тайлбарла)
+
+### Анхан шатны шүүхийн ердийн хандлага:
+[тайлбар]
+
+### Давж заалдах шатны шүүхийн хандлага:
+[тайлбар]
+
+### Монгол Улсын Дээд шүүхийн зарчмын шийдвэрүүд:
+[Дээд шүүхийн тогтсон байр суурийн тухай ерөнхий тайлбар — дугаар гаргахгүй, зарчмыг л дурдах]
+
+---
+
+## 4. Өмгөөлөгч болгоомжлох зүйлс
+
+- Эсрэг тал ашиглаж болох хуулийн үндэслэл
+- Хариу аргумент
+
+---
+
+## 5. shuukh.mn-д хайхад зөвлөмж болгох НЭР ТОМЬЁО
+
+Доорх үгсийг хайлтанд оруулж шийдвэр хай:
+- "[нэр томьёо 1]"
+- "[нэр томьёо 2]"
+- "[нэр томьёо 3]"
+
+⚠️ **Тайлбар:** Claude нь shuukh.mn болон Дээд шүүхийн мэдээллийн санд биечлэн хандах боломжгүй тул шийдвэрийн дугаарыг баталж чадахгүй. Бодит шийдвэрийг дээрх линкүүдээр шалгана уу.`;
+
+  setBtnDisabled('sm-btn',true);
+  loading('sm-load','sm-res',true);
+  document.getElementById('sm-res').classList.add('hidden');
+  try {
+    const r = await claude(model, prompt, null, null, 8192);
+    renderMD('sm-out', r);
+    loading('sm-load','sm-res',false);
+    document.getElementById('sm-res').scrollIntoView({behavior:'smooth'});
+  } catch(e) { alert('Алдаа: '+e.message); document.getElementById('sm-load').classList.add('hidden'); }
+  setBtnDisabled('sm-btn',false);
+}
+
+// ── HELPERS ──────────────────────────────────────
+function setBtnDisabled(id, v) { const b=document.getElementById(id); if(b) b.disabled=v; }
+
+function getOutText(id) {
+  const el = document.getElementById(id);
+  return el.innerText || el.textContent || '';
+}
+
+function dlTxt(id, name) {
+  const text = getOutText(id); if(!text) return;
+  dl(new Blob([text],{type:'text/plain;charset=utf-8'}), name+'_'+today()+'.txt');
+}
+
+function dlTxtRaw(id, name) {
+  const text = document.getElementById(id).textContent; if(!text) return;
+  dl(new Blob([text],{type:'text/plain;charset=utf-8'}), name+'_'+today()+'.txt');
+}
+
+// Word export — rendered HTML-г шууд ашиглана (format бүрэн хадгална)
+function dlDoc(id, name) {
+  const inner = document.getElementById(id).innerHTML;
+  if (!inner || inner.trim() === '') return;
+  const wordHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office'
+xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'>
+<style>
+@page { margin: 2.5cm 2.5cm 2.5cm 2.5cm; }
+body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.75; color: #1a1a2e; }
+h1 { font-size: 16pt; font-weight: bold; text-align: center; color: #1a1a2e;
+     margin: 18pt 0 8pt; border-bottom: 2pt solid #1a1a2e; padding-bottom: 5pt; }
+h2 { font-size: 13pt; font-weight: bold; color: #1e3a5f; background: #e8edf5;
+     padding: 5pt 8pt; margin: 16pt 0 6pt; border-left: 4pt solid #1e3a5f; }
+h3 { font-size: 11.5pt; font-weight: bold; color: #1e3a5f; margin: 12pt 0 5pt;
+     padding: 3pt 0; border-bottom: 1pt solid #d1d5db; }
+h4 { font-size: 11pt; font-weight: bold; margin: 8pt 0 3pt; color: #374151; }
+p { margin: 4pt 0 7pt; }
+ul { padding-left: 18pt; margin: 5pt 0 8pt; list-style-type: disc; }
+ol { padding-left: 18pt; margin: 5pt 0 8pt; }
+li { margin: 3pt 0; line-height: 1.65; }
+table { border-collapse: collapse; width: 100%; margin: 10pt 0; }
+th { background: #1a1a2e; color: #ffffff; padding: 7pt 9pt; font-size: 10pt;
+     font-weight: bold; text-align: left; border: 1pt solid #1a1a2e; }
+td { padding: 6pt 9pt; border: 1pt solid #b0b8c4; font-size: 10pt; vertical-align: top; }
+tr:nth-child(even) td { background: #f0f4f8; }
+strong { font-weight: bold; }
+em { font-style: italic; }
+hr { border: none; border-top: 1.5pt solid #d1d5db; margin: 12pt 0; }
+blockquote { border-left: 4pt solid #3b82f6; padding: 6pt 12pt;
+             background: #eff6ff; margin: 8pt 0; color: #1e40af; }
+code { font-family: Courier New, monospace; font-size: 10pt; background: #f1f5f9; padding: 1pt 4pt; }
+</style>
+</head>
+<body>${inner}</body></html>`;
+  dl(new Blob([wordHtml], {type:'application/msword;charset=utf-8'}), name+'_'+today()+'.doc');
+}
+
+function dlDocRaw(id, name) {
+  const text = document.getElementById(id).textContent; if(!text) return;
+  const html=`<html><head><meta charset='utf-8'><style>
+body{font-family:Arial;font-size:11pt;line-height:1.7;margin:2.5cm}
+pre{white-space:pre-wrap;font-family:Arial;font-size:11pt}
+</style></head><body><pre>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></body></html>`;
+  dl(new Blob([html],{type:'application/msword;charset=utf-8'}), name+'_'+today()+'.doc');
+}
+
+function dl(blob, fname) {
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:fname});
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function today() { return new Date().toISOString().slice(0,10); }
+</script>
+</body>
+</html>
